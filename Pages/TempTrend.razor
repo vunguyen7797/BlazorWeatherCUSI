@@ -1,0 +1,131 @@
+﻿@page "/temptrend"
+@inject HttpClient http;
+@using Newtonsoft.Json.Linq
+@using BlazorWeatherCUSI.Data
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject WeatherForecastService ForecastService
+
+
+<MudContainer MaxWidth="MaxWidth.False" Style="background-color: #F8F8F8;">
+    <MudGrid>
+        <MudItem xs="12" sm="12" md="10">
+            <MudText Typo="Typo.h5" Class="pt-10 pl-10" Style="font-weight: bold; color:#0a0a0a">Temperature Trend Graphs</MudText>
+            <MudText Typo="Typo.h5" Class="pt-5 pl-10" Style="font-weight: 500; font-size:15px; color:#0a0a0a">Location (@Lat, @Lon) - Zip code: @ZipCode</MudText>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.h6" Align="Align.Center" Class="pt-10 pl-10 pb-3" Style="font-weight: bold;">Current & Next 48 Hours Temperatures Trend</MudText>
+
+    <MudGrid Class="pb-10 pl-5 pr-5">
+        <MudItem xs="12">
+            <MudPaper Style="height:auto; border-radius:30px;" Elevation="0">
+                @if (TempTrendSeries == null)
+                {
+                    <MudProgressCircular MudBlazor.Color="MudBlazor.Color.Default" Indeterminate="true" />
+                }
+                else
+                {
+                    <MudChart ChartType="MudBlazor.ChartType.Line" Style="background-color:white;" LegendPosition="Position.Bottom" ChartSeries="@TempTrendSeries" XAxisLabels="@TempTrendXLabels" Width="100%" Height="500px"></MudChart>
+
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.h6" Align="Align.Center" Class="pt-10 pl-10 pb-3" Style="font-weight: bold;">Today & Next 2 Days High Temperatures Trend</MudText>
+
+    <MudGrid Class="pb-10 pl-5 pr-5">
+        <MudItem xs="12">
+            <MudPaper Style="height:auto; border-radius:30px;" Elevation="0">
+                @if (HighTempTrendSeries == null)
+                {
+                    <MudProgressCircular MudBlazor.Color="MudBlazor.Color.Default" Indeterminate="true" />
+                }
+                else
+                {
+                    <MudChart ChartType="MudBlazor.ChartType.Line" Style="background-color:white;" ChartSeries="@HighTempTrendSeries" XAxisLabels="@HighTempTrendXLables" Width="100%" Height="500px"></MudChart>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+
+
+@code {
+
+    JObject JsonData = new JObject();
+    string Lat ="";
+    string Lon ="";
+    string ZipCode = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get geodata stored in local storage when zip code is searched in Current weather page
+        Lat = await localStorage.GetItemAsync<string>("lat");
+        Lon = await localStorage.GetItemAsync<string>("lon");
+        ZipCode = await localStorage.GetItemAsync<string>("zipcode");
+
+        await GenerateGraphs();
+
+    }
+
+    // Graph 1 labels and data
+    public List<ChartSeries> TempTrendSeries;
+    public string[] TempTrendXLabels = new string[49];
+
+    // Graph 2 labels and data
+    public List<ChartSeries> HighTempTrendSeries;
+    public string[] HighTempTrendXLables = new string[3];
+
+
+    private async Task GenerateGraphs()
+    {
+        JsonData = await ForecastService.OneCallForecast(Lat, Lon);
+
+        if (JsonData != null)
+        {
+            var TempTrend = new List<ChartSeries>() { new ChartSeries() { Name = "Temperatures (Unit: °F)", Data = new double[49] },};
+
+            TempTrendXLabels[0] = "Now";   // Current label
+
+            TempTrend[0].Data[0] = (double)JsonData["current"]["temp"];    // Current temperature
+
+            string currentDate = DateTime.Now.ToShortDateString();
+            System.DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0);
+
+            // Extract data for the next 48 hours
+            for (int i = 0; i < 48; i++)
+            {
+                // Just print the date as a label if the date is different from current date
+                if (dateTime.AddSeconds((double)JsonData["hourly"][i]["dt"]).ToLocalTime().ToShortDateString() == currentDate)
+                    TempTrendXLabels[i + 1] = "";
+                else
+                {
+                    TempTrendXLabels[i + 1] = dateTime.AddSeconds((double)JsonData["hourly"][i]["dt"]).ToLocalTime().ToShortDateString();
+                    currentDate = TempTrendXLabels[i + 1];
+                }
+                TempTrend[0].Data[i + 1] = (double)JsonData["hourly"][i]["temp"];
+            }
+
+            TempTrendSeries = TempTrend;
+            StateHasChanged();
+
+            //-----------------------------------
+
+            var HighTempTrend = new List<ChartSeries>() { new ChartSeries() { Name = "Temperatures (Unit: °F)", Data = new double[3] },};
+
+
+            for (int i = 0; i < 3; i++)
+            {
+                HighTempTrendXLables[i] = dateTime.AddSeconds((double)JsonData["daily"][i]["dt"]).ToLocalTime().ToShortDateString();
+                HighTempTrend[0].Data[i] = (double)JsonData["daily"][i]["temp"]["max"];
+            }
+
+            HighTempTrendSeries = HighTempTrend;
+            StateHasChanged();
+        }
+
+    }
+}
+

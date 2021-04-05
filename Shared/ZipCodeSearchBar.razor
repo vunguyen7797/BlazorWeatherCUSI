@@ -1,0 +1,23 @@
+﻿<MudTextField Class="pt-10"  Style="background-color:white; " ValueChanged="OnZipCodeChange"
+              Placeholder="Search By US Zip Code"
+              Variant="Variant.Outlined"
+              Adornment="Adornment.End"
+              Validation="@(new Func<string, IEnumerable<string>>(ZipCodeValidate))"
+              AdornmentIcon="@Icons.Filled.Search" />
+
+@code {
+
+    // Call back when user searchs for a new zip code
+    [Parameter]
+    public EventCallback<string> OnZipCodeChange { get; set; }
+
+    private IEnumerable<string> ZipCodeValidate(string zipcode)
+    {
+        if (string.IsNullOrEmpty(zipcode))
+        {
+            yield return "Zip code is empty!";
+        }
+        else if (zipcode.Length > 5)
+            yield return "Zip code is invalid";
+    }
+}

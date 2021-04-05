@@ -1,0 +1,201 @@
+﻿@page "/"
+
+@using Newtonsoft.Json.Linq
+@using BlazorWeatherCUSI.Data
+@inject WeatherForecastService Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<MudContainer MaxWidth="MaxWidth.False" Style="background-color: #F8F8F8;">
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudText Typo="Typo.h5" Class="pt-10 pl-10" Style="font-weight: bold; Color:#0a0a0a">Weather Today</MudText>
+            <MudText Class="pt-2 pb-8 pl-10" Style="Color: #808080; font-size: 15px; font-weight:500">@LocalDate</MudText>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <ZipCodeSearchBar OnZipCodeChange="@OnChangeZip"></ZipCodeSearchBar>
+        </MudItem>
+    </MudGrid>
+
+    <MudGrid Class="pb-10 pl-5 pr-5">
+        <MudItem xs="12">
+            <MudPaper Class="d-flex align-center justify-start" Style="height:auto; border-radius:30px;" Elevation="0">
+
+                <MudPaper Class="flex-grow-1 order-2 pr-12 pl-5" Elevation="0" Style="border-radius:30px;">
+                    <MudCard Class="pl-12" Elevation="0" Style="border-radius:30px;">
+                        @if (PhotoUrl != "")
+                        {
+                            <MudCardMedia Style="border-radius:30px;" Image=@PhotoUrl />
+                        }
+                        else
+                        { <MudProgressCircular MudBlazor.Color="MudBlazor.Color.Default" Indeterminate="true" />}
+                    </MudCard>
+                </MudPaper>
+
+                <MudPaper Class="flex-grow-0 order-1 pl-12 pr-5" Elevation="0" Style="border-radius:30px;">
+                    <MudText Align="Align.Left" Typo="Typo.h5" Class="pt-10 pl-5" Style="font-weight: bold;">@Data.CityName @Data.Country, @ZipCode</MudText>
+                    <MudText Class="pt-2 pb-4 pl-5" Style="Color: #484848; font-size: 15px;">Sunrise: @Data.Sunrise - Sunset: @Data.Sunset</MudText>
+                    <MudText Align="Align.Left" Class="pt-1 pb-1 pl-5" Style="font-weight: bold; font-size: 70px;">@Data.Temperature °F</MudText>
+                    <MudText Align="Align.Left" Typo="Typo.h5" Class="pb-10" Style="font-weight: 500;">
+                        <img src=@Data.IconUrl style="height:70px" />
+                        @Data.Description
+                    </MudText>
+                </MudPaper>
+
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.h5" Class="pt-5 pl-10 pb-5" Style="font-weight: bold; Color:#0a0a0a">Today's Highlights</MudText>
+
+    <MudGrid Class="pb-10 pl-5 pr-5">
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px;border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Feels like</MudText>
+                <MudText Class="pt-2 pb-4 pl-5" Align="Align.Left" Style="Color: #0a0a0a; font-size: 35px; font-weight:500;">@Data.FeelsLike<small style="font-size: 17px"> °F</small></MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px; border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Pressure</MudText>
+                <MudText Class="pt-2 pb-4 pl-5" Align="Align.Left" Style="Color: #0a0a0a;font-size: 35px; font-weight: 500;">@Data.Pressure<small style="font-size: 17px"> hPa</small></MudText>
+            </MudPaper>
+        </MudItem>
+        
+        <MudItem xs="12" sm="12" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px;border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Humidity</MudText>
+                <MudText Class="pt-2 pb-4 pl-5" Align="Align.Left" Style="Color: #0a0a0a;font-size: 35px;font-weight: 500;">@Data.Humidity<small style="font-size: 17px"> %</small></MudText>
+            </MudPaper>
+        </MudItem>
+
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px;border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Max & Min Temp</MudText>
+
+                <MudPaper Class="d-flex pb-5 pl-5" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Outlined.VerticalAlignTop" Color=Color.Primary Size="Size.Medium" />
+                    <MudText Class=" pl-5" Style=" Color: #0a0a0a; font-size: 18px; font-weight:500">@Data.MaxTemperature<small style="font-size: 17px"> °F</small></MudText>
+                </MudPaper>
+                <MudPaper Class="d-flex pl-5" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Outlined.VerticalAlignBottom" Color=Color.Primary Size="Size.Medium" />
+                    <MudText Class=" pl-5" Style=" Color: #0a0a0a; font-size: 18px; font-weight:500">@Data.MinTemperature<small style="font-size: 17px"> °F</small></MudText>
+                </MudPaper>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px; border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Visibility</MudText>
+                <MudText Class="pt-2 pb-4 pl-5" Align="Align.Left" Style="Color: #0a0a0a;font-size: 35px;font-weight: 500;">@Data.Visibility<small style="font-size: 17px"> km</small></MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="12" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px; border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Wind Speed</MudText>
+                <MudText Class="pt-2 pb-2 pl-5" Align="Align.Left" Style="Color: #0a0a0a;font-size: 35px; font-weight: 500;">@Data.WindSpeed<small style="font-size: 17px"> miles/hour</small>  </MudText>
+                <MudText Class=" pl-5 pb-4" Style=" Color: #0a0a0a; font-size: 15px; font-weight:500">
+                    <MudIcon Icon="@Icons.Material.Outlined.CompassCalibration" Color=Color.Primary Size="Size.Medium" /><small style="font-size: 13px"> Direction </small>@Data.WindDirection
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px; border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Cloudiness</MudText>
+                <MudText Class="pt-2 pb-4 pl-5" Align="Align.Left" Style="Color: #0a0a0a;font-size: 35px;font-weight: 500;">@Data.Cloudiness<small style="font-size: 17px"> %</small></MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px;border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Rain Volume</MudText>
+                <MudPaper Class="d-flex pb-5 pl-5" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Outlined.BeachAccess" Color=Color.Primary Size="Size.Medium" />
+                    <MudText Class=" pl-5" Style=" Color: #0a0a0a; font-size: 18px; font-weight:500">Last 1 hour: @Data.Rain1h<small style="font-size: 17px"> mm</small></MudText>
+                </MudPaper>
+                <MudPaper Class="d-flex pl-5" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Outlined.BeachAccess" Color=Color.Primary Size="Size.Medium" />
+                    <MudText Class=" pl-5" Style=" Color: #0a0a0a; font-size: 18px; font-weight:500">Last 3 hours: @Data.Rain3h<small style="font-size: 17px"> mm</small></MudText>
+                </MudPaper>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="0" Class="pa-4" Style="height: 175px;border-radius: 30px;">
+                <MudText Class="pt-2 pb-4 pl-5" Style="Color: #808080; font-size: 15px;">Snow Volume</MudText>
+                <MudPaper Class="d-flex pb-5 pl-5" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Outlined.AcUnit" Color=Color.Primary Size="Size.Medium" />
+                    <MudText Class=" pl-5" Style=" Color: #0a0a0a; font-size: 18px; font-weight:500">Last 1 hour: @Data.Snow1h<small style="font-size: 17px"> mm</small></MudText>
+                </MudPaper>
+                <MudPaper Class="d-flex pl-5" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Outlined.AcUnit" Color=Color.Primary Size="Size.Medium" />
+                    <MudText Class=" pl-5" Style=" Color: #0a0a0a; font-size: 18px; font-weight:500">Last 3 hours: @Data.Snow3h<small style="font-size: 17px"> mm</small></MudText>
+                </MudPaper>
+            </MudPaper>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+
+
+
+
+@code{
+
+    // Weather Data object
+    WeatherModel Data = new WeatherModel();
+
+    string ZipCode = "72401"; // default zip code
+
+    string LocalDate = DateTime.Now.ToLocalTime().ToString();
+
+    string PhotoUrl = "";
+
+
+    // Call back function when user search weather for a zip code
+    private async void OnChangeZip(string newZip)
+    {
+        WeatherModel NewData = new WeatherModel();
+
+        NewData = await Http.GetCurrentWeather(newZip);
+        PhotoUrl = "";
+
+        if (NewData != null)
+        {
+            Console.WriteLine("On change zip");
+            ZipCode = newZip;
+            await localStorage.SetItemAsync("zipcode", ZipCode);
+            await localStorage.SetItemAsync("lat", NewData.Latitude);
+            await localStorage.SetItemAsync("lon", NewData.Longitude);
+            StateHasChanged();
+            PhotoUrl = Data.PhotoUrl;
+            Data = NewData;
+            StateHasChanged();
+        }
+    }
+
+
+    // Fetch weather Data on website first rendering.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("Render Page");
+            ZipCode = await localStorage.GetItemAsync<string>("zipcode");
+            Data = await Http.GetCurrentWeather(ZipCode);
+            PhotoUrl = Data.PhotoUrl;
+            StateHasChanged();
+            await localStorage.SetItemAsync("lat", Data.Latitude);
+            await localStorage.SetItemAsync("lon", Data.Longitude);
+            await localStorage.SetItemAsync("zipcode", ZipCode);
+        }
+
+    }
+
+}

@@ -1,0 +1,45 @@
+﻿@inherits LayoutComponentBase
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<MudThemeProvider Theme="MyCustomTheme" />
+<MudLayout>
+    <MudDrawer Open="true" Elevation="0">
+        <MudDrawerHeader>
+            <MudAvatar Image="images/cusi.png" Style="height:100px; width:100px;" Class="mx-auto" />
+        </MudDrawerHeader>
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+
+@code{
+    MudTheme MyCustomTheme = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Primary = "#A10702",
+            Secondary = Colors.Red.Lighten1,
+            HoverOpacity = 0.01,
+            Info = Colors.Red.Darken4,
+            AppbarBackground = Colors.Red.Default,
+            InfoContrastText = Colors.Red.Darken1
+
+        },
+
+        LayoutProperties = new LayoutProperties()
+        {
+            DrawerWidthLeft = "200px",
+            DrawerWidthRight = "300px",
+            AppbarMinHeight = "0px"
+        },
+
+        ZIndex = new ZIndex()
+        {
+            AppBar = 0
+        }
+    };
+   
+}
