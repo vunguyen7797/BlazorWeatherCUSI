@@ -10,9 +10,10 @@ This web application was built on Blazor, a feature of ASP.NET framework. It's p
 
 ## Front-end Plugin
 
-MudBlazor was used to support faster development of the front-end.
+* MudBlazor was used to support faster development of the front-end.
 [NuGet Gallery | Microsoft.AspNetCore.Blazor.HttpClient 3.2.0-preview3.20168.3 (mudblazor.com)](https://mudblazor.com/)
-Weather API: OpenWeather
+
+* Weather API: OpenWeather
 [Current weather data - OpenWeatherMap](https://openweathermap.org/current)
 
 ## Other Packages
